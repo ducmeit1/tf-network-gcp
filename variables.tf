@@ -25,7 +25,7 @@ variable "gcp_subnetwork" {
 
 variable "ip_cidr_range" {
     description = "The IP CIDR Range of the GCP Sub-network which be used."
-    type string
+    type = string
     default = "10.127.0.0/20"
 }
 
