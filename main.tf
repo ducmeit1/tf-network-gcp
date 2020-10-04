@@ -35,7 +35,7 @@ resource "google_compute_router" "router" {
 }
 
 resource "google_compute_router_nat" "router-nat" {
-  project = var.project
+  project = var.gcp_project
   name = format("%s-nat-gateway", var.gcp_network)
   router = google_compute_router.router.name
   region = var.gcp_region
