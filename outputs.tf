@@ -14,12 +14,12 @@ output "network_gateway_ipv4" {
 
 output "subnetwork_name" {
     description = "Name of created the sub network."
-    value = google_compute_subnetwork.subnet.name
+    value = google_compute_subnetwork.subnet.*.name
 }
 
 output "subnetwork_self_link" {
     description = "Self link of created the sub network."
-    value = google_compute_subnetwork.subnet.self_link
+    value = google_compute_subnetwork.subnet.*.self_link
 }
 
 output "nat_ip_addresses" {
