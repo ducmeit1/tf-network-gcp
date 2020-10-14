@@ -5,7 +5,8 @@ terraform {
 resource "google_compute_network" "network" {
   project                 = var.gcp_project
   name                    = var.gcp_network
-  auto_create_subnetworks = false
+  routing_mode            = var.routing_mode
+  auto_create_subnetworks = var.auto_create_subnetworks
 }
 
 resource "google_compute_subnetwork" "subnet" {
