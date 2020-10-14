@@ -21,7 +21,7 @@ module "network" {
     source            = "github.com/ducmeit1/tf-network-gcp"
     gcp_project       = "ducmeit1"
     gcp_network       = "global-network"
-    gcp_subnetworks=[
+    gcp_subnetworks   =[
     {
         name          = "dc1-subnet"
         region        = "asia-east1"
