@@ -7,6 +7,11 @@ output "network_self_link" {
     value = google_compute_network.network.self_link
 }
 
+output "network_gateway_ipv4" {
+    description = "Network gateway IPV4."
+    value = google_compute_network.network.gateway_ipv4
+}
+
 output "subnetwork_name" {
     description = "Name of created the sub network."
     value = google_compute_subnetwork.subnet.name
