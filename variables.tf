@@ -20,7 +20,7 @@ variable "gcp_network" {
 
 variable "gcp_subnetworks" {
     description = "The name of the GCP Sub-networks where all resources will be linked."
-    type        = map(string)
+    type        = list(map(string))
 }
 
 variable "routing_mode" {
