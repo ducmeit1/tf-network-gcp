@@ -23,3 +23,8 @@ module "network" {
     gcp_subnetwork_name = "shared-subnet"
 }
 ```
+
+```shell
+terraform plan
+terraform apply --auto-approve
+```
