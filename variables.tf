@@ -18,9 +18,9 @@ variable "gcp_network" {
     type        = string
 }
 
-variable "gcp_subnetwork" {
-    description = "The name of the GCP Sub-network where all resources will be linked."
-    type        = string
+variable "gcp_subnetworks" {
+    description = "The name of the GCP Sub-networks where all resources will be linked."
+    type        = map(string)
 }
 
 variable "routing_mode" {
@@ -29,26 +29,8 @@ variable "routing_mode" {
     default     = "GLOBAL"
 }
 
-variable "auto_create_subnetworks" {
-    description = "Allow to create default subnetwork for network."
-    type        = bool
-    default     = false
-}
-
-variable "ip_cidr_range" {
-    description = "The IP CIDR Range of the GCP Sub-network which be used."
-    type        = string
-    default     = "10.127.0.0/20"
-}
-
 variable "total_nat_ips" {
     description = "The total number of nat IP address wil be created for Cloud-NAT."
     type        = number
     default     = 1
-}
-
-variable "additions_subnetwork_names" {
-    description = "The list of name subnetworks allow uses Cloud NAT."
-    type        = list(string)
-    default     = []
 }

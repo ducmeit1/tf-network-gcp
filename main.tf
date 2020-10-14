@@ -6,14 +6,15 @@ resource "google_compute_network" "network" {
   project                 = var.gcp_project
   name                    = var.gcp_network
   routing_mode            = var.routing_mode
-  auto_create_subnetworks = var.auto_create_subnetworks
+  auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "subnet" {
+  for_each                 = var.gcp_subnetworks
   project                  = var.gcp_project
-  name                     = var.gcp_subnetwork
-  region                   = var.gcp_region
-  ip_cidr_range            = var.ip_cidr_range
+  name                     = lookup(each.value, "name", null)
+  region                   = lookup(each.value, "region", null)
+  ip_cidr_range            = lookup(each.value, "ip_cidr_range", null)
   network                  = google_compute_network.network.self_link
   private_ip_google_access = true
 }
@@ -50,9 +51,9 @@ resource "google_compute_router_nat" "router-nat" {
   }
 
   dynamic "subnetwork" {
-    for_each = toset(concat([google_compute_subnetwork.subnet.name], var.additions_subnetwork_names))
+    for_each = var.gcp_subnetworks
     content {
-      name = subnetwork.value
+      name = lookup(each.value, "name", null)
       source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
     }
   }
