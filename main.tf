@@ -20,30 +20,30 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 resource "google_compute_address" "nat_ips" {
-  count = var.total_nat_ips
-  name = format("nat-ip-%s", count.index)
-  project = var.gcp_project
-  region = var.gcp_region
+  count     = var.total_nat_ips
+  name      = format("nat-ip-%s", count.index)
+  project   = var.gcp_project
+  region    = var.gcp_region
 }
 
 resource "google_compute_router" "router" {
-  project = var.gcp_project
-  region = var.gcp_region
-  name = format("%s-router", var.gcp_network)
-  network = google_compute_network.network.self_link
+  project     = var.gcp_project
+  region      = var.gcp_region
+  name        = format("%s-router", var.gcp_network)
+  network     = google_compute_network.network.self_link
   bgp {
     asn = 64514
   }
 }
 
 resource "google_compute_router_nat" "router-nat" {
-  project = var.gcp_project
-  name = format("%s-nat-gateway", var.gcp_network)
-  router = google_compute_router.router.name
-  region = var.gcp_region
-  nat_ip_allocate_option = "MANUAL_ONLY"
-  nat_ips = google_compute_address.nat_ips.*.self_link
-  source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+  project                             = var.gcp_project
+  name                                = format("%s-nat-gateway", var.gcp_network)
+  router                              = google_compute_router.router.name
+  region                              = var.gcp_region
+  nat_ip_allocate_option              = "MANUAL_ONLY"
+  nat_ips                             = google_compute_address.nat_ips.*.self_link
+  source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
 
   log_config {
     enable = true
@@ -51,9 +51,9 @@ resource "google_compute_router_nat" "router-nat" {
   }
 
   dynamic "subnetwork" {
-    for_each = var.gcp_subnetworks
+    for_each                  = var.gcp_subnetworks
     content {
-      name = lookup(each.value, "name", null)
+      name                    = lookup(each.value, "name", null)
       source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
     }
   }
