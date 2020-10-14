@@ -1,43 +1,33 @@
-output "network_name" {
-    description = "Name of created the network."
-    value       = google_compute_network.network.name
-}
-output "network_self_link" {
-    description = "Self link of created the network."
-    value       = google_compute_network.network.self_link
-}
-
-output "network_gateway_ipv4" {
-    description = "Network gateway IPV4."
-    value       = google_compute_network.network.gateway_ipv4
+output "network" {
+    description = "The network was created."
+    value       = {
+        name            = google_compute_network.default.name,
+        self_link       = google_compute_network.default.self_link,
+        gateway_ipv4    = google_compute_network.default.gateway_ipv4
+        routing_mode    = var.routing_mode
+    }
 }
 
-output "subnetwork_name" {
-    description = "Name of created the sub network."
-    value       = google_compute_subnetwork.subnet.*.name
+output "subnetwork" {
+    description = "The list of Subnetworks were created."
+    value       = [
+        for subnet in google_compute_subnetwork.default: {
+            name                = subnet.name
+            ip_cidr_range       = subnet.ip_cidr_range
+            gateway_address     = subnet.gateway_address
+            self_link           = subnet.self_link
+        }
+            
+    ]
 }
 
-output "subnetwork_self_link" {
-    description = "Self link of created the sub network."
-    value       = google_compute_subnetwork.subnet.*.self_link
-}
-
-output "nat_ip_addresses" {
-    description = "Address of created the nat ips."
-    value       = google_compute_address.nat_ips.*.address
-}
-
-output "nat_ip_self_link" {
-    description = "Self link of created the nat ips."
-    value       = google_compute_address.nat_ips.*.self_link
-}
-
-output "router_name" {
-    description = "name of created the router."
-    value       = google_compute_router.router.name
-}
-
-output "router_self_link" {
-    description = "Self link of created the router."
-    value       = google_compute_router.router.self_link
+output "router" {
+    description = "The list of Routers were created."
+    value       = [
+        for router in google_compute_router.default: {
+            name        = router.name
+            region      = router.region
+            self_link   = router.self_link
+        }
+    ]
 }

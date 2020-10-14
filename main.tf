@@ -2,47 +2,55 @@ terraform {
     required_version = ">= 0.12"
 }
 
-resource "google_compute_network" "network" {
-  project                 = var.gcp_project
-  name                    = var.gcp_network
-  routing_mode            = var.routing_mode
-  auto_create_subnetworks = false
+locals {
+  region_subnets = {
+    for subnet in var.gcp_subnetworks:
+      subnet.region => subnet.name...
+  }
 }
 
-resource "google_compute_subnetwork" "subnet" {
-  for_each                 = var.gcp_subnetworks
+resource "google_compute_network" "default" {
+  project                         = var.gcp_project
+  name                            = var.gcp_network
+  routing_mode                    = var.routing_mode
+  delete_default_routes_on_create = var.delete_default_routes_on_create
+  description                     = var.description
+  auto_create_subnetworks         = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  depends_on               = [google_compute_network.default]
   project                  = var.gcp_project
-  name                     = lookup(each.value, "name", null)
-  region                   = lookup(each.value, "region", null)
-  ip_cidr_range            = lookup(each.value, "ip_cidr_range", null)
-  network                  = google_compute_network.network.self_link
+  for_each                 = {
+    for subnet in var.gcp_subnetworks : "${subnet.name}.${subnet.region}.${subnet.ip_cidr_range}" => subnet
+  }
+  name                     = each.value.name
+  region                   = each.value.region
+  ip_cidr_range            = each.value.ip_cidr_range
+  network                  = google_compute_network.default.self_link
   private_ip_google_access = true
 }
 
-resource "google_compute_address" "nat_ips" {
-  count     = var.total_nat_ips
-  name      = format("nat-ip-%s", count.index)
-  project   = var.gcp_project
-  region    = var.gcp_region
-}
-
-resource "google_compute_router" "router" {
+resource "google_compute_router" "default" {
+  depends_on  = [google_compute_network.default]
   project     = var.gcp_project
-  region      = var.gcp_region
-  name        = format("%s-router", var.gcp_network)
-  network     = google_compute_network.network.self_link
+  for_each    = local.region_subnets
+  name        = format("%s-%s-router", var.gcp_network, each.key)
+  region      = each.key
+  network     = google_compute_network.default.self_link
   bgp {
     asn = 64514
   }
 }
 
-resource "google_compute_router_nat" "router-nat" {
+resource "google_compute_router_nat" "default" {
+  depends_on                          = [google_compute_subnetwork.default, google_compute_router.default]
   project                             = var.gcp_project
-  name                                = format("%s-nat-gateway", var.gcp_network)
-  router                              = google_compute_router.router.name
-  region                              = var.gcp_region
-  nat_ip_allocate_option              = "MANUAL_ONLY"
-  nat_ips                             = google_compute_address.nat_ips.*.self_link
+  for_each                            = local.region_subnets
+  name                                = format("%s-%s-nat-gw", var.gcp_network, each.key)
+  router                              = format("%s-%s-router", var.gcp_network, each.key)
+  region                              = each.key
+  nat_ip_allocate_option              = "AUTO_ONLY"
   source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
 
   log_config {
@@ -51,9 +59,12 @@ resource "google_compute_router_nat" "router-nat" {
   }
 
   dynamic "subnetwork" {
-    for_each                  = var.gcp_subnetworks
+    for_each = [for s in each.value: {
+      subnet = s
+    }]
+
     content {
-      name                    = lookup(each.value, "name", null)
+      name                    = subnetwork.value.subnet
       source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
     }
   }

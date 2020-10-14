@@ -8,19 +8,28 @@ variable "gcp_project" {
     type        = string
 }
 
-variable "gcp_region" {
-    description = "The name of the GCP Region where all resources will be launched."
-    type        = string
-}
-
 variable "gcp_network" {
     description = "The name of the GCP Network where all resources will be linked."
     type        = string
 }
 
 variable "gcp_subnetworks" {
-    description = "The name of the GCP Sub-networks where all resources will be linked."
-    type        = list(map(string))
+    description = "The list of the GCP Sub-networks where all resources will be linked."
+    type        = set(object({
+        name                = string
+        region              = string
+        ip_cidr_range       = string
+    }))
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# OPTIONAL PARAMETERS
+# ---------------------------------------------------------------------------------------------------------------------
+
+variable "description" {
+    description = "The description of the GCP Network."
+    type        = string
+    default     = ""
 }
 
 variable "routing_mode" {
@@ -29,8 +38,8 @@ variable "routing_mode" {
     default     = "GLOBAL"
 }
 
-variable "total_nat_ips" {
-    description = "The total number of nat IP address wil be created for Cloud-NAT."
-    type        = number
-    default     = 1
+variable "delete_default_routes_on_create" {
+    description = "If set to true, default routes (0.0.0.0/0) will be deleted immediately after network creation."
+    type        = bool
+    default     = false
 }
