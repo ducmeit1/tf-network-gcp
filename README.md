@@ -8,6 +8,10 @@ This module will:
 - Create one or multiple sub-networks for the private network on GCP.
 - Create one or multiple Cloud-NATs to allows access over internet inside the private network.
 
+## Requirement
+
+- Terraform >= 0.12
+
 ## Usage
 
 ### Input
