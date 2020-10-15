@@ -7,6 +7,11 @@ locals {
     for subnet in var.gcp_subnetworks:
       subnet.region => subnet.name...
   }
+
+  additional_region_subnets = {
+    for subnet in var.additional_nat_subnetworks:
+      subnet.region => subnet.name...
+  }
 }
 
 resource "google_compute_network" "default" {
@@ -54,7 +59,7 @@ resource "google_compute_router_nat" "default" {
   source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
 
   log_config {
-    enable = true
+    enable = var.nat_logging
     filter = "ERRORS_ONLY"
   }
 
@@ -65,6 +70,15 @@ resource "google_compute_router_nat" "default" {
 
     content {
       name                    = subnetwork.value.subnet
+      source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+    }
+  }
+
+  dynamic "subnetwork" {
+    for_each = [for r, s in local.additional_region_subnets: s if r == each.key ]
+
+    content {
+      name                    = subnetwork.value
       source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
     }
   }

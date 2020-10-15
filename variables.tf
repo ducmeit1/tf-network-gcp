@@ -43,3 +43,18 @@ variable "delete_default_routes_on_create" {
     type        = bool
     default     = false
 }
+
+variable "nat_logging" {
+    description = "Enable Router NAT Logging."
+    type        = bool
+    default     = false
+}
+
+variable "additional_nat_subnetworks" {
+    description = "Adding more subnetworks to nat router by name."
+    type        = set(object({
+        name    = string
+        region  = string
+    }))
+    default     = []
+}
